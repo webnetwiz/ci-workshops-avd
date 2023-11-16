@@ -12,6 +12,7 @@
   - [AAA Authorization](#aaa-authorization)
 - [Monitoring](#monitoring)
   - [TerminAttr Daemon](#terminattr-daemon)
+  - [Logging](#logging)
 - [MLAG](#mlag)
   - [MLAG Summary](#mlag-summary)
   - [MLAG Device Configuration](#mlag-device-configuration)
@@ -174,6 +175,31 @@ daemon TerminAttr
    no shutdown
 ```
 
+### Logging
+
+#### Logging Servers and Features Summary
+
+| Type | Level |
+| -----| ----- |
+
+| VRF | Source Interface |
+| --- | ---------------- |
+| default | Management0 |
+
+| VRF | Hosts | Ports | Protocol |
+| --- | ----- | ----- | -------- |
+| default | 10.200.0.108 | Default | UDP |
+| default | 10.200.1.108 | Default | UDP |
+
+#### Logging Servers and Features Device Configuration
+
+```eos
+!
+logging host 10.200.0.108
+logging host 10.200.1.108
+logging source-interface Management0
+```
+
 ## MLAG
 
 ### MLAG Summary
@@ -271,6 +297,7 @@ vlan 4094
 | Ethernet1 | MLAG_PEER_s1-leaf1_Ethernet1 | *trunk | *- | *- | *['MLAG'] | 1 |
 | Ethernet2 | S1-SPINE1_Ethernet3 | *trunk | *10 | *- | *- | 2 |
 | Ethernet3 | S1-SPINE2_Ethernet3 | *trunk | *10 | *- | *- | 2 |
+| Ethernet4 | s1-host1_eth2 | *access | *10 | *- | *- | 4 |
 | Ethernet6 | MLAG_PEER_s1-leaf1_Ethernet6 | *trunk | *- | *- | *['MLAG'] | 1 |
 
 *Inherited from Port-Channel Interface
@@ -294,6 +321,11 @@ interface Ethernet3
    no shutdown
    channel-group 2 mode active
 !
+interface Ethernet4
+   description s1-host1_eth2
+   no shutdown
+   channel-group 4 mode active
+!
 interface Ethernet6
    description MLAG_PEER_s1-leaf1_Ethernet6
    no shutdown
@@ -310,6 +342,7 @@ interface Ethernet6
 | --------- | ----------- | ---- | ---- | ----- | ----------- | ------------| --------------------- | ------------------ | ------- | -------- |
 | Port-Channel1 | MLAG_PEER_s1-leaf1_Po1 | switched | trunk | - | - | ['MLAG'] | - | - | - | - |
 | Port-Channel2 | SPINES_Po2 | switched | trunk | 10 | - | - | - | - | 2 | - |
+| Port-Channel4 | s1-host1 | switched | access | 10 | - | - | - | - | 4 | - |
 
 #### Port-Channel Interfaces Device Configuration
 
@@ -329,6 +362,14 @@ interface Port-Channel2
    switchport trunk allowed vlan 10
    switchport mode trunk
    mlag 2
+!
+interface Port-Channel4
+   description s1-host1
+   no shutdown
+   switchport
+   switchport access vlan 10
+   mlag 4
+   spanning-tree portfast
 ```
 
 ### VLAN Interfaces
